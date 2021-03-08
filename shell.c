@@ -42,7 +42,9 @@ int main(void)
         }
         // Case: child
         else if (child == 0) {
-            execvp(command, &command);
+            if (execvp(command, &command) == -1) {
+                perror("execvp");
+            }
         }
         // Case: parent
         else {
