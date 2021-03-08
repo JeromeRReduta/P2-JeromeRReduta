@@ -13,6 +13,8 @@
 #include "logger.h"
 #include "ui.h"
 
+#include "util.h"
+
 int main(void)
 {
     init_ui();
@@ -33,7 +35,7 @@ int main(void)
         char *args[10] = {(char*) 0};
 
         while ((current = next_token(&next, " \t\r\n")) != NULL) {
-            printf("Token %02d: '%s'\n", tokens, current);
+            LOG("Token %02d: '%s'\n", tokens, current);
 
             args[tokens++] = current;
 

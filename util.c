@@ -1,7 +1,7 @@
 #include "util.h"
 #include <stdlib.h>
 #include <string.h>
-// #include <stdio.h> // Need this?
+#include <stdio.h> // Need this?
 
 /**
  * Retrieves the next token from a string.
