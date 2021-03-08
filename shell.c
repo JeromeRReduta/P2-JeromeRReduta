@@ -32,7 +32,10 @@ int main(void)
         char *next = command;
         char *current;
 
-        char *args[10] = {(char*) 0};
+        // 4096 b/c according to Prof. Malensek, POSIX standard requires
+        // shells to accept 4096 args (1st being name)
+        // Now compiles w/ posix standards!
+        char *args[_POSIX_ARG_MAX] = {(char*) 0};
 
         while ((current = next_token(&next, " \t\r\n")) != NULL) {
             LOG("Token %02d: '%s'\n", tokens, current);
