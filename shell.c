@@ -26,25 +26,12 @@ int main(void)
 
         LOG("Input command: %s\n", command);
 
-        char *args[10] = {(char*) 0};
-
-        int tokens = 0;
-    
-
-        char *next_tok = command;
-        char *curr_tok;
-
-        /* Tokenizes. Note that the below delim will be ignored */
-        while ((curr_tok = next_token(&next_tok, " \t\r\n")) != NULL) {
-            args[tokens++] = curr_tok;
-            LOG("Token %02d: '%s'\n", tokens++, curr_tok);
-        }
-
         
-     
+        char *args[10] = {(char*) 0};
+        args[0] = "-l";
+    
         // TODO: copied and pasted from lecture - refactor later
         // Bulitins?
-        // Free memory before exiting!!!!!
         if (strcmp(command, "exit") == 0) {
             return EXIT_SUCCESS;
         }
@@ -60,7 +47,7 @@ int main(void)
         }
         // Case: child
         else if (child == 0) {
-            if (execvp(args[0], args) == -1) {
+            if (execvp("ls", args) == -1) {
                 perror("execvp");
             }
         }
