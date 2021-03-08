@@ -7,7 +7,13 @@
 #include "logger.h"
 #include "ui.h"
 
+/* Function prototypes */
 static int readline_init(void);
+char *scriptline(char **line_ptr, size_t *line_sz_ptr);
+
+
+
+
 static char prompt_str[80] = "--[enter a command]--> ";
 static bool scripting = false;
 void init_ui(void)
@@ -35,25 +41,42 @@ char *prompt_line(void) {
 
 char *read_command(void)
 {
+    char *line = NULL;
+    size_t line_sz = 0;
 
+    return scripting ? scriptline(&line, &line_sz) : readline(prompt_line());
+
+/*
     if (scripting) {
         char *line = NULL;
         size_t line_sz = 0;
-        // Note: Have to free mem from this later
-        size_t read_sz = getline(&line, &line_sz, stdin);
-
-        if (read_sz == -1) {
-            perror("getline");
-            return NULL;
-        }
-
-        return line;
+       
         
     }
     else {
         return readline(prompt_line());
     }
+    */
 }
+
+char *scriptline(char **line_ptr, size_t *line_sz_ptr)
+{
+
+    // Note: Have to free mem from this later
+    // Note: getline keeps \n char 
+    size_t read_sz = getline(line_ptr, line_sz_ptr, stdin);
+
+    if (read_sz == -1) {
+        perror("getline");
+        return NULL;
+    }
+
+    line[read_sz-1] = '\0';
+
+    return *line_ptr;
+}
+
+
 
 int readline_init(void)
 {
