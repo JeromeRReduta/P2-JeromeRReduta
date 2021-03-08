@@ -32,6 +32,9 @@ int main(void)
             return EXIT_SUCCESS;
         }
 
+        char *args[10] = {(char*) 0};
+        args[0] = "-l";
+
         pid_t child = fork();
 
         // If cannot make any more children, just keep going until
@@ -42,7 +45,7 @@ int main(void)
         }
         // Case: child
         else if (child == 0) {
-            if (execvp(command, &command) == -1) {
+            if (execvp("ls", args) == -1) {
                 perror("execvp");
             }
         }
