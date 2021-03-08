@@ -80,6 +80,7 @@ int main(void)
             close(fileno(stderr));
             
             // Putting this out of error case - see if it works
+            // If I don't put this return outside of the error case, I think we end up with an infinite loop?
             return EXIT_FAILURE;
         }
         // Case: parent
