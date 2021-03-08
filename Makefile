@@ -20,10 +20,9 @@ $(bin): $(obj)
 libshell.so: $(obj)
 	$(CC) $(CFLAGS) $(LDLIBS) $(LDFLAGS) $(obj) -shared -o $@
 
-shell.o: shell.c history.h logger.h ui.h util.c util.h
-history.o: history.c history.h logger.h util.c util.h
-ui.o: ui.h ui.c logger.h history.h util.c util.h
-util.o: util.c util.h logger.h
+shell.o: shell.c history.h logger.h ui.h 
+history.o: history.c history.h logger.h 
+ui.o: ui.h ui.c logger.h history.h 
 
 clean:
 	rm -f $(bin) $(obj) libshell.so vgcore.*
