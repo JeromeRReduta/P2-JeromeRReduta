@@ -25,6 +25,13 @@ int main(void)
         }
 
         LOG("Input command: %s\n", command);
+    
+        // TODO: copied and pasted from lecture - refactor later
+        if (strcmp(command, "exit") == 0) {
+            return EXIT_SUCCESS;
+        }
+    
+    
     }
 
     return 0;
