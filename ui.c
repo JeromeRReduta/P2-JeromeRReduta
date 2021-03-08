@@ -71,7 +71,7 @@ char *scriptline(char **line_ptr, size_t *line_sz_ptr)
         return NULL;
     }
 
-    line[read_sz-1] = '\0';
+    *line_ptr[read_sz-1] = '\0';
 
     return *line_ptr;
 }
