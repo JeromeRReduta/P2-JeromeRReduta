@@ -25,6 +25,10 @@ int main(void)
         }
 
         LOG("Input command: %s\n", command);
+
+        
+        char *args[10] = {(char*) 0};
+        args[0] = "-l";
     
         // TODO: copied and pasted from lecture - refactor later
         // Bulitins?
@@ -32,8 +36,6 @@ int main(void)
             return EXIT_SUCCESS;
         }
 
-        char *args[10] = {(char*) 0};
-        args[0] = "-l";
 
         pid_t child = fork();
 
