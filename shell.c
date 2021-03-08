@@ -34,7 +34,6 @@ int main(void)
 
         char *next_tok = command;
         char *curr_tok;
-
         /* Tokenizes. Note that the below delim will be ignored */
         while ((curr_tok = next_token(&next_tok, " \t\r\n")) != NULL) {
             args[tokens++] = curr_tok;
