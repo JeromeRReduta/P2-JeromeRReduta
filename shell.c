@@ -69,7 +69,7 @@ int main(void)
             if (execvp(args[0], args) == -1) {
                 perror("execvp");
 
-                // Put this in error case - check to see if Prof. Malensek moves it back
+                // Put this in error case - check to see if
                 return EXIT_FAILURE;
             }
 

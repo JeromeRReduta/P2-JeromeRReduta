@@ -9,7 +9,6 @@
 
 static int readline_init(void);
 static char prompt_str[80] = "--[enter a command]--> ";
-
 static bool scripting = false;
 void init_ui(void)
 {
@@ -19,17 +18,13 @@ void init_ui(void)
     LOG("Setting locale: %s\n",
             (locale != NULL) ? locale : "could not set locale!");
 
-
     if (isatty(STDIN_FILENO)) {
-        LOGP("STDIN IS A TTY, INTERACTIVE MODE\n");
+        LOGP("stdin is a TTY -> interactive\n");
     }
     else {
-        LOGP("DATA IN PIPE; SCRIPT MODE\n");
+        LOGP("Data is piped in on stdin -> script\n");
         scripting = true;
     }
-
-
-
 
     rl_startup_hook = readline_init;
 }
@@ -40,20 +35,20 @@ char *prompt_line(void) {
 
 char *read_command(void)
 {
-    // Pseudocode: If in scripting mode, don't use readline - else, use readline
-    if (scripting) {
 
-        // Note: According to lecture, getline needs *line to be NULL and line_sz to be 0, or it won't automatically manipulate data
+    if (scripting) {
         char *line = NULL;
         size_t line_sz = 0;
+        // Note: Have to free mem from this later
         size_t read_sz = getline(&line, &line_sz, stdin);
 
         if (read_sz == -1) {
             perror("getline");
-            return NULL;
+            return NULL:
         }
 
         return line;
+        
     }
     else {
         return readline(prompt_line());
