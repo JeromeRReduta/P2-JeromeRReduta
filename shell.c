@@ -27,8 +27,26 @@ int main(void)
         LOG("Input command: %s\n", command);
     
         // TODO: copied and pasted from lecture - refactor later
+        // Bulitins?
         if (strcmp(command, "exit") == 0) {
             return EXIT_SUCCESS;
+        }
+
+        pid_t child = fork();
+
+        // If cannot make any more children, just keep going until
+        // we can make another fork
+        if (child == -1) {
+            perror("fork");
+            continue;
+        }
+        // Case: child
+        else if (child == 0) {
+            execvp(command, &command);
+        }
+        // Case: parent
+        else {
+
         }
     
     
