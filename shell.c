@@ -11,6 +11,7 @@
 
 #include "history.h"
 #include "logger.h"
+#include "util.h"
 #include "ui.h"
 
 int main(void)
@@ -29,7 +30,8 @@ int main(void)
         
         char *args[10] = {(char*) 0};
         args[0] = "-l";
-    
+
+
         // TODO: copied and pasted from lecture - refactor later
         // Bulitins?
         if (strcmp(command, "exit") == 0) {
