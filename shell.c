@@ -26,9 +26,20 @@ int main(void)
 
         LOG("Input command: %s\n", command);
 
-        
+        int tokens = 0;
+        char *next = command;
+        char *current;
+
         char *args[10] = {(char*) 0};
-        args[0] = "-l";
+
+        while ((current = next_token(&next, " \t\r\n")) != NULL) {
+            printf("Token %02d: '%s'\n", tokens, current);
+
+            args[tokens++] = current;
+
+        }
+        
+ 
 
 
         // TODO: copied and pasted from lecture - refactor later
@@ -48,7 +59,7 @@ int main(void)
         }
         // Case: child
         else if (child == 0) {
-            if (execvp("ls", args) == -1) {
+            if (execvp(args[0], args) == -1) {
                 perror("execvp");
             }
         }
