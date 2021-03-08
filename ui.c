@@ -20,7 +20,7 @@ void init_ui(void)
             (locale != NULL) ? locale : "could not set locale!");
 
 
-    if (isatty(STDIN_FILNO)) {
+    if (isatty(STDIN_FILENO)) {
         LOGP("STDIN IS A TTY, INTERACTIVE MODE\n");
     }
     else {
