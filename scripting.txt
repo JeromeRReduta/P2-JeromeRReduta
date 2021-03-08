@@ -1,0 +1,3 @@
+echo "hi there"
+ls -l /
+pwd
