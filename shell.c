@@ -63,10 +63,21 @@ int main(void)
             continue;
         }
         // Case: child
+        // Note: possible for child to reset stdin stream, so have to close child
+        // Linux only
         else if (child == 0) {
             if (execvp(args[0], args) == -1) {
                 perror("execvp");
+
+                // Put this in error case - check to see if Prof. Malensek moves it back
+                return EXIT_FAILURE;
             }
+
+            // Close these 3 so that child doesn't reset data
+            // Last 2 not too necessary but 1st one is
+            close(fileno(stdin));
+            close(fileno(stdout));
+            close(fileno(stderr));
         }
         // Case: parent
         else {
