@@ -54,18 +54,3 @@ char *next_token(char **str_ptr, const char *delim)
 
     return current_ptr;
 }
-
-int main(void)
-{
-    char str[] = "     This is a really great string, is it not?!";
-
-    int tokens = 0;
-    char *next_tok = str;
-    char *curr_tok;
-    /* Tokenize. Note that ' ,?!' will all be removed. */
-    while ((curr_tok = next_token(&next_tok, " ,?!")) != NULL) {
-        printf("Token %02d: '%s'\n", tokens++, curr_tok);
-    }
-
-    return 0;
-}
