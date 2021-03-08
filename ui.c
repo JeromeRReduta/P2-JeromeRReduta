@@ -44,7 +44,7 @@ char *read_command(void)
 
         if (read_sz == -1) {
             perror("getline");
-            return NULL:
+            return NULL;
         }
 
         return line;
