@@ -24,7 +24,7 @@ void init_ui(void)
         LOGP("STDIN IS A TTY, INTERACTIVE MODE\n");
     }
     else {
-        printf("DATA IN PIPE; SCRIPT MODE\n");
+        LOGP("DATA IN PIPE; SCRIPT MODE\n");
         scripting = true;
     }
 

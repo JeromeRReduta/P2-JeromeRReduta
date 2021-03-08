@@ -81,7 +81,7 @@ int main(void)
         }
         // Case: parent
         else {
-            puts("Bubba Bradley is waiting for his daughter\n");
+            //puts("Bubba Bradley is waiting for his daughter\n");
 
             int status;
             waitpid(child, &status, 0);
