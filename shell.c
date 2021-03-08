@@ -11,6 +11,7 @@
 
 #include "history.h"
 #include "logger.h"
+#include "util.h"
 #include "ui.h"
 
 int main(void)
