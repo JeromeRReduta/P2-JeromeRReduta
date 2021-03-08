@@ -69,15 +69,18 @@ int main(void)
             if (execvp(args[0], args) == -1) {
                 perror("execvp");
 
-                // Put this in error case - check to see if
-                return EXIT_FAILURE;
+               
             }
+            
 
             // Close these 3 so that child doesn't reset data
             // Last 2 not too necessary but 1st one is
             close(fileno(stdin));
             close(fileno(stdout));
             close(fileno(stderr));
+            
+            // Putting this out of error case - see if it works
+            return EXIT_FAILURE;
         }
         // Case: parent
         else {
