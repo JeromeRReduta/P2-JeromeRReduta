@@ -41,22 +41,26 @@ char *prompt_line(void) {
 
 char *read_command(void)
 {
-    char *line = NULL;
-    size_t line_sz = 0;
 
-    return scripting ? scriptline(&line, &line_sz) : readline(prompt_line());
 
-/*
+
     if (scripting) {
         char *line = NULL;
         size_t line_sz = 0;
+
+        size_t read_sz = getline(&line, &line_sz, stdin);
+        if (read_sz == -1) {
+            perror("getline");
+            return NULL;
+        }
+
+        return line;
        
         
     }
     else {
         return readline(prompt_line());
     }
-    */
 }
 
 char *scriptline(char **line_ptr, size_t *line_sz_ptr)
