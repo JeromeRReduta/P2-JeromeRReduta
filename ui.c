@@ -30,7 +30,7 @@ static bool scripting = false;
 
 char *get_prompt_str(char *prompt_str)
 {
-    char prompt_str_copy[80] = "[";
+    char prompt_str_copy[80] = "You're li-shell-ing to KRASH at [";
 
     add_login(prompt_str_copy);
     add_hostname(prompt_str_copy);
@@ -66,7 +66,7 @@ void add_current_dir(char *prompt_str_copy)
     char *home_dir_head = strstr(cwd_buf, home_dir);
 
     if (home_dir_head != NULL && home_dir_head - cwd_buf == 0) {
-        LOG("FOUND HOME_DIR:\t%s\n", home_dir_head);
+        //LOG("FOUND HOME_DIR:\t%s\n", home_dir_head);
         // Replace "/home/jrreduta" w/ "~"
         strcat(prompt_str_copy, "~");
         // Add the rest

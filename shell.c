@@ -12,8 +12,8 @@
 #include "history.h"
 #include "logger.h"
 #include "ui.h"
-
 #include "util.h"
+#include "signal.h"
 
 /* Function prototypes */
 void skip_comment(char **current_ptr, char *next);
@@ -22,6 +22,8 @@ int main(void)
 {
     init_ui();
 
+
+    signal_init_handlers();
     char *command;
     while (true) {
         command = read_command();
