@@ -2,20 +2,83 @@
 #include <readline/readline.h>
 #include <locale.h>
 #include <stdbool.h>
+#include <pwd.h>
 
 #include "history.h"
 #include "logger.h"
 #include "ui.h"
 
+
+
 /* Function prototypes */
 static int readline_init(void);
-char *scriptline(char **line_ptr, size_t *line_sz_ptr);
+
+char *get_prompt_str();
+void add_login(char *prompt_str_copy);
+void add_hostname(char *prompt_str_copy);
+void add_current_dir(char *prompt_str_copy);
 
 
 
 
 static char prompt_str[80] = "--[enter a command]--> ";
+char* home_dir = "/home/jrreduta";
+
+static int home_dir_len = strlen("/home/jrreduta");
 static bool scripting = false;
+
+
+char *get_prompt_str(char *prompt_str)
+{
+    char prompt_str_copy[80] = "[";
+
+    add_login(prompt_str_copy);
+    add_hostname(prompt_str_copy);
+    add_current_dir(prompt_str_copy);
+
+    strcat(prompt_str_copy, "]");
+    strcpy(prompt_str, prompt_str_copy);
+
+
+
+    return prompt_str;
+}
+
+void add_login(char *prompt_str_copy)
+{
+    strcat(prompt_str_copy, getlogin());
+    strcat(prompt_str_copy, "@");
+}
+
+void add_hostname(char *prompt_str_copy)
+{
+    char hostname_buf[80];
+    gethostname(hostname_buf, 80);
+    strcat(prompt_str_copy, hostname_buf);
+    strcat(prompt_str_copy, ":\t");
+
+}
+
+void add_current_dir(char *prompt_str_copy)
+{
+    char cwd_buf[80];
+    getcwd(cwd_buf, 80);
+    char *home_dir_head = strstr(cwd_buf, home_dir);
+
+    if (home_dir_head != NULL && home_dir_head - cwd_buf == 0) {
+        LOG("FOUND HOME_DIR:\t%s\n", home_dir_head);
+        // Replace "/home/jrreduta" w/ "~"
+        strcat(prompt_str_copy, "~");
+        // Add the rest
+        strcat(prompt_str_copy, cwd_buf + home_dir_len);
+    }
+    else {
+        strcat(prompt_str_copy, cwd_buf);
+    }
+
+}
+
+
 void init_ui(void)
 {
     LOGP("Initializing UI...\n");
@@ -36,6 +99,7 @@ void init_ui(void)
 }
 
 char *prompt_line(void) {
+    get_prompt_str(prompt_str);
     return prompt_str;
 }
 

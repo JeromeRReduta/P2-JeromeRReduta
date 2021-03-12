@@ -16,4 +16,6 @@ int key_down(int count, int key);
 char *prompt_line(void);
 char *read_command(void);
 
+extern char* home_dir;
+
 #endif
