@@ -18,6 +18,7 @@ static int tail_index;
 /* Func prototypes */
 int circ_array_go_back_by(int i, int n);
 int circ_array_go_forward_by(int i, int n);
+int starts_with(char *word, char *prefix);
 
 void hist_init(unsigned int limit)
 {
@@ -42,18 +43,23 @@ void hist_destroy(void)
 void hist_add(const char *cmd)
 {
 
-    LOG("LOGGING CMD:\t'%s'\n", cmd);
+    //LOG("LOGGING CMD:\t'%s'\n", cmd);
     command_nums[counter % max_len] = counter+1;
 
 
     // strlen(cmd) - 1 to exclude \n @ end
-    lines[counter % max_len] = strndup(cmd, strlen(cmd) - 1); // TODO: FREE ALL LINES LATER
+    lines[counter % max_len] = strndup(cmd, strlen(cmd)); // TODO: FREE ALL LINES LATER
+
+    char* newline_loc = strstr(lines[counter % max_len], "\n");
+    if (newline_loc != NULL) {
+        *newline_loc = '\0';
+    }
 
     
     tail_index = (tail_index + 1) % max_len;
 
 
-    LOG("Hist command %d = '%s'\ttail index is now %d \n", command_nums[counter % max_len], lines[counter % max_len], tail_index);
+    //LOG("Hist command %d = '%s'\ttail index is now %d \n", command_nums[counter % max_len], lines[counter % max_len], tail_index);
     
     counter++;
 
@@ -74,44 +80,81 @@ void hist_print(void)
         circ_array_go_back_by(tail_index, current_len),
         tail_index);
 
-    int i = circ_array_go_back_by(tail_index, current_len)- 1;
 
+    // Case: Head (first entry)
 
+    int i = circ_array_go_back_by(tail_index, current_len);
+    printf("    %d  %s\n", command_nums[i], lines[i]);
+   
     // Case: Everything except tail
-    while (i != tail_index - 2 ) {
-         i = circ_array_go_forward_by(i, 1);
-        LOG("I IS NOW:\t%d\n", i);
+    while (i != tail_index - 1 ) {
+        i = circ_array_go_forward_by(i, 1);
         printf("    %d  %s\n", command_nums[i], lines[i]);
        
     }
-    // Case: tail (most recent entry)
-    i = circ_array_go_forward_by(i, 1);
-    printf("    %d  %s\n", command_nums[i], lines[i]);
+    fflush(stdout); // Hey, this is pretty essential for printing stuff in right order...
+ 
 
 }
 
 const char *hist_search_prefix(char *prefix)
 {
-    // TODO: Retrieves the most recent command starting with 'prefix', or NULL
-    // if no match found.
+
+    /*
+            LOG("WHICH IS LARGEST?\n"
+            "\t->line[counter-1]:\t'%s'\n"
+            "\t->line[counter]:\t'%s'\n"
+            "\t->line[counter+1]:\t'%s'\n",
+            hist_search_cnum(counter-1), hist_search_cnum(counter), hist_search_cnum(counter+1));
+
+            LOG("WHICH NUM IS LARGEST?\n"
+                "\t->line[counter-1]:\t'%d'\n"
+                "\t->line[counter]:\t'%d'\n"
+                "\t->line[counter+1\t %d \n",
+                command_nums[(counter -1) % max_len - 1],
+                command_nums[(counter) % max_len - 1],
+                command_nums[(counter + 1) % max_len - 1]);
+    */
+    LOG("PREFIX:\t'%s'\n", prefix);
+    // Case: Head (last entry)
+    int i = tail_index - 1;
+
+    if (starts_with(lines[i], prefix)) {
+        LOG("LINES[I]:\t%s\tPREFIX:\t%s\n", lines[i], prefix);
+        return lines[i];
+    }
+    while (i != tail_index) {
+        i = circ_array_go_back_by(i, 1);
+          LOG("i:\t%d\tcommand_num:\t%d\tlines[i]\t%s\n", i, command_nums[i], lines[i]);
+        if (starts_with(lines[i], prefix)) {
+            LOG("LINES[I]:\t%s\tPREFIX:\t%s\n", lines[i], prefix);
+            return lines[i];
+        }
+    }
+
+    LOGP("NOTHING MATCHES: RETURNING NULL\n");
     return NULL;
+
 }
 
 const char *hist_search_cnum(int command_number)
 {
 
-    if (command_number <= counter) {
-        LOG("COMMAND NUM <= COUNTER\n");
 
-        int i = command_number % max_len - 1;
+    if (command_number <= counter) {
+        LOGP("COMMAND NUM <= COUNTER\n");
+
+        int i = circ_array_go_back_by(command_number, 1);
 
         LOG("LOOKING FOR COMMAND W/ NUM:\t%d\n"
             "FOUND:\n"
+                "\t->COUNTER:\t%d\n"
                 "\t->COMMAND_NUM:\t%d\n"
-                "\t->CONTENT:\t%s\n",
-            command_nums[i], lines[i]);
+                "\t->CONTENT:\t%s\n"
+                "\t->i:\t%d\n",
+            command_number, counter, command_nums[i], lines[i], i);
 
-        return lines[i];
+        return command_number == command_nums[i] ? lines[i] : NULL;
     }
     // TODO: Retrieves a particular command number. Return NULL if no match
     // found.
@@ -120,8 +163,8 @@ const char *hist_search_cnum(int command_number)
 
 unsigned int hist_last_cnum(void)
 {
-    // TODO: Retrieve the most recent command number.
-    return 0;
+
+    return counter;
 }
 
 int circ_array_go_back_by(int i, int n)
@@ -134,4 +177,10 @@ int circ_array_go_forward_by(int i, int n)
 {
     return abs((100 + i + n) % max_len);
 
+}
+
+// Found this implementation from https://stackoverflow.com/questions/15515088/how-to-check-if-string-starts-with-certain-string-in-c/15515276
+int starts_with(char *word, char *prefix)
+{
+    return strncmp(word, prefix, strlen(prefix)) == 0;
 }

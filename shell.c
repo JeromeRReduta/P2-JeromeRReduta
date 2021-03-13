@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #include "history.h"
 #include "logger.h"
@@ -18,6 +19,7 @@
 /* Function prototypes */
 void skip_comment(char **current_ptr, char *next);
 void cd_with(char **args);
+void replaceIfBang(char *command);
 
 int main(void)
 {
@@ -35,8 +37,12 @@ int main(void)
     hist_init(100);
     char *command;
 
+    char *command_copy; // FREE THIS LTER
     while (true) {
         command = read_command();
+
+
+        replaceIfBang(command);
 
        
 
@@ -89,9 +95,6 @@ int main(void)
         if (tokens == 0) {
             LOGP("NO TOKENS:\n");
 
-        }
-        else if (strcmp(args[0], "!!") == 0) {
-            LOGP("!! DETECTED\n");
         }
         // TODO: copied and pasted from lecture - refactor later
         // Case: exit
@@ -172,6 +175,67 @@ void cd_with(char **args)
     LOG("PATH:\t'%s'\n", path);
     if (chdir(path) == -1) {
         perror("chdir");
+    }
+
+}
+
+void replaceIfBang(char *command)
+{
+
+
+    if (command == NULL) {
+        return;
+    }
+    else if (command[0] == '!' && isdigit(command[1])) {
+        int command_num = atoi(command + 1);
+        const char* replacement = hist_search_cnum(command_num);
+
+
+        LOG("DOING HIST NUM:\n"
+            "\t->command:\t'%s'\n"
+            "\t->command_num:\t%d\n"
+            "\t->replacement:\t'%s'\n",
+            command, command_num, replacement);
+
+        if (replacement != NULL) {
+            strcpy(command, replacement);
+        }
+    }
+    else if (command[0] == '!' && isalpha(command[1])) {
+        char* prefix = command + 1;
+        char* newline_loc = strstr(prefix, "\n");
+
+        if (newline_loc != NULL) {
+            *newline_loc = '\0';
+        }
+
+        const char* replacement = hist_search_prefix(prefix);
+
+
+        LOG("DOING HIST PREFIX:\n"
+            "\t->command:\t'%s'\n"
+            "\t->prefix:\t'%s'\n"
+            "\t->replacement:\t'%s'\n",
+            command, prefix, replacement);
+
+        if (replacement != NULL) {
+            strcpy(command, replacement);
+        }
+
+
+    }
+
+    else if (strncmp(command, "!!", 2) == 0) {
+
+        char* replacement = hist_search_cnum(hist_last_cnum());
+
+        LOG("DOING !!:\n"
+            "\t->replacement:\t'%s'\n",
+            replacement);
+
+        if (replacement != NULL) {
+            strcpy(command, replacement);
+        }
     }
 
 }
