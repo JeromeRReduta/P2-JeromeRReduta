@@ -17,21 +17,37 @@
 
 /* Function prototypes */
 void skip_comment(char **current_ptr, char *next);
+void cd_with(char **args);
 
 int main(void)
 {
     init_ui();
 
 
+// take command and add to history
+// have to worry about !command_name
+    // If !aiweghaihge doesn't return anything (returns NULL), don't add to memory
+// strdup() p impt for adding command
+// BAD IDEA: hard-coding history_entry size (but good when starting)
+// Also, have to free all cases of readline()
+
     signal_init_handlers();
+    hist_init(100);
     char *command;
+
     while (true) {
         command = read_command();
+
+       
+
         if (command == NULL) {
             break;
         }
 
         LOG("Input command: %s\n", command);
+
+
+        hist_add(command);
 
         int tokens = 0;
         char *next = command;
@@ -74,6 +90,9 @@ int main(void)
             LOGP("NO TOKENS:\n");
 
         }
+        else if (strcmp(args[0], "!!") == 0) {
+            LOGP("!! DETECTED\n");
+        }
         // TODO: copied and pasted from lecture - refactor later
         // Case: exit
         else if (strcmp(command, "exit") == 0) {
@@ -81,12 +100,11 @@ int main(void)
         }
         // Case: cd
         else if (strcmp(args[0], "cd") == 0) {
-
-            char* path = args[1] != NULL ? args[1] : home_dir;
-            LOG("COMMAND HAS CD:\t'%s'\n", args[0]);
-            LOG("PATH:\t'%s'\n", path);
-            chdir(path);
-
+            cd_with(args);
+        }
+        else if (strcmp(args[0], "history") == 0) {
+            LOG("HISTORY INPUTTED:\t'%s'\n", command);
+            hist_print();
         }
         // Case: anything else
        else {
@@ -146,3 +164,14 @@ void skip_comment(char **current_ptr, char *next) {
 
 }
 
+void cd_with(char **args)
+{
+    char* path = args[1] != NULL ? args[1] : home_dir;
+    
+    LOG("COMMAND HAS CD:\t'%s'\n", args[0]);
+    LOG("PATH:\t'%s'\n", path);
+    if (chdir(path) == -1) {
+        perror("chdir");
+    }
+
+}

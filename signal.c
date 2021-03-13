@@ -35,15 +35,15 @@ void signal_init_handlers()
 // Handles inputted signals
 void sigint_handler(int signo)
 {
-    
-    printf("\n");
+
     if (signo == SIGINT) {
+
         
         LOGP("CTRL C PRESSED\n");
 
         /* Note: ui.c already prints prompt by default if task is not currently running, while
          * cancelling running process. I have no idea why */
-        
+
         fflush(stdout);
     }
 }

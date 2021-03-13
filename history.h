@@ -7,6 +7,8 @@
 #ifndef _HISTORY_H_
 #define _HISTORY_H_
 
+
+
 void hist_init(unsigned int);
 void hist_destroy(void);
 void hist_add(const char *);
