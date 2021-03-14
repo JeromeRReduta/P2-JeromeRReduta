@@ -145,8 +145,15 @@ int main(void)
             else {
                 //puts("Bubba Bradley is waiting for his daughter\n");
 
+                LOG("LAST ARG = ARG[%d]:\t'%s'\n", tokens - 1, args[tokens-1]);
                 int status;
-                waitpid(child, &status, 0);
+
+ 
+                bool isBackgroundJob = strcmp(args[tokens - 1], "&") == 0;
+                
+                pid_t wait_return = !isBackgroundJob ? waitpid(child, &status, 0)
+                    : waitpid(-1, &status, WNOHANG);
+
 
             }
 
