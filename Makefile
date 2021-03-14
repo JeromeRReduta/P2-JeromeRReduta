@@ -24,6 +24,7 @@ shell.o: shell.c history.h logger.h ui.h signal.c signal.h pipe.c pipe.h
 history.o: history.c history.h logger.h 
 ui.o: ui.h ui.c logger.h history.h 
 util.o: util.c util.h logger.h
+pipe.o: pipe.c pipe.h logger.h
 
 
 clean:

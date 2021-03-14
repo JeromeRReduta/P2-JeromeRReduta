@@ -18,7 +18,6 @@
 
 /* Function prototypes */
 void skip_comment(char **current_ptr, char *next);
-void cd_with(char **args);
 void replaceIfBang(char *command);
 
 int main(void)
@@ -167,17 +166,7 @@ void skip_comment(char **current_ptr, char *next) {
 
 }
 
-void cd_with(char **args)
-{
-    char* path = args[1] != NULL ? args[1] : home_dir;
-    
-    LOG("COMMAND HAS CD:\t'%s'\n", args[0]);
-    LOG("PATH:\t'%s'\n", path);
-    if (chdir(path) == -1) {
-        perror("chdir");
-    }
 
-}
 
 void replaceIfBang(char *command)
 {
@@ -227,7 +216,7 @@ void replaceIfBang(char *command)
 
     else if (strncmp(command, "!!", 2) == 0) {
 
-        char* replacement = hist_search_cnum(hist_last_cnum());
+        const char* replacement = hist_search_cnum(hist_last_cnum());
 
         LOG("DOING !!:\n"
             "\t->replacement:\t'%s'\n",

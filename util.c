@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h> // Need this?
+#include "ui.h"
+#include <unistd.h>
+#include "logger.h"
 
 /**
  * Retrieves the next token from a string.
@@ -53,4 +56,22 @@ char *next_token(char **str_ptr, const char *delim)
     }
 
     return current_ptr;
+}
+
+
+void cd_with(char **args)
+{
+    char* path = args[1] != NULL ? args[1] : home_dir;
+    
+    LOG("COMMAND HAS CD:\t'%s'\n", args[0]);
+    LOG("PATH:\t'%s'\n", path);
+    if (chdir(path) == -1) {
+        perror("chdir");
+    }
+
+}
+// Found this implementation from https://stackoverflow.com/questions/15515088/how-to-check-if-string-starts-with-certain-string-in-c/15515276
+int starts_with(char *word, char *prefix)
+{
+    return strncmp(word, prefix, strlen(prefix)) == 0;
 }

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <stdlib.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -16,6 +17,8 @@ struct command_line {
 /* Function prototypes */
 int run_process(struct command_line *cmds);
 void set_command_line(struct command_line *cmd, char **tokens, bool stdout_pipe, char *stdout_file);
+void destroy_command_line(struct command_line **cmd);
+
 
 void execute_pipeline(struct command_line *cmds)
 {
@@ -62,6 +65,7 @@ void execute_pipeline(struct command_line *cmds)
     int num_of_commands = sizeof(struct command_line) / sizeof(cmds);
     // printf("SIZEOF COMMANDLINE[3]:\t%d\n", num_of_commands);
 
+    // Change this to num_cof_commands (int param) and figure out how to fit htis
     for (int i = 0; i < num_of_commands; i++) {
         
         int success = run_process(cmds + i);
@@ -173,5 +177,16 @@ void set_command_line(struct command_line *cmd, char **tokens, bool stdout_pipe,
     cmd->stdout_file = stdout_file;
 }
 
+void destroy_command_line(struct command_line **cmds)
+{
+    int num_of_commands = sizeof(struct command_line) / sizeof(cmds);
 
+    for (int i = 0; i < num_of_commands; i++) {
+        free(cmds[i]);
+    }
+
+    free(cmds);
+
+    // Note: UNTESTED - NEED TO CHECK THIS OUT LATER
+}
 

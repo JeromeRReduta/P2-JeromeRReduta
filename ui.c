@@ -3,10 +3,15 @@
 #include <locale.h>
 #include <stdbool.h>
 #include <pwd.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <stdlib.h>
+#include <stdbool.h>
 
 #include "history.h"
 #include "logger.h"
 #include "ui.h"
+#include "util.h"
 
 
 
@@ -26,6 +31,12 @@ char* home_dir = "/home/jrreduta";
 
 static int home_dir_len = strlen("/home/jrreduta");
 static bool scripting = false;
+
+static DIR* dir_ptr = NULL;
+static char* dir_name = NULL; // For debugging
+static int current_arg_i = 0;
+static int current_builtin_i = 0;
+static bool checked_for_builtins = false;
 
 
 char *get_prompt_str(char *prompt_str)
@@ -92,6 +103,13 @@ void init_ui(void)
     }
     else {
         LOGP("Data is piped in on stdin -> script\n");
+        //char* args[] = {"cd", "/"};
+        //cd_with(args);
+
+        char cwd_buf[80];
+        getcwd(cwd_buf, 80);
+
+        LOG("CWD:\t'%s'\n", cwd_buf);
         scripting = true;
     }
 
@@ -198,11 +216,161 @@ char **command_completion(const char *text, int start, int end)
  */
 char *command_generator(const char *text, int state)
 {
+
+
+    LOGP("____________________START AUTO-COMPLETE____________________\n\n");
     // TODO: find potential matching completions for 'text.' If you need to
     // initialize any data structures, state will be set to '0' the first time
     // this function is called. You will likely need to maintain static/global
     // variables to track where you are in the search so that you don't start
     // over from the beginning.
 
+    LOGP("GETTING PATH...\n");
+
+    char* path = getenv("PATH");
+    if (path == NULL) {
+        LOGP("WHY IS PATH NULL??");
+        return NULL;
+    }
+
+    char *path_copy = strdup(path); // free later
+
+    LOG("PATH_COPY:\t'%s'\n", path_copy);
+    LOG("INPUT_STR:\t'%s'\n", text);
+    LOG("PATH EMPTY? %d\tINPUT_STR EMPTY? %d\n", strlen(path_copy) == 0, strlen(text) == 0);
+
+
+    int tokens = 0;
+    char *next = path_copy;
+    char *current;
+
+    // 4096 b/c according to Prof. Malensek, POSIX standard requires
+    // shells to accept 4096 args (1st being name)
+    // Now compiles w/ posix standards!
+    char *args[4096] = {(char*) 0};
+
+    current = next_token(&next, ":");
+
+
+    while (current != NULL) {
+
+        LOG("PATH %02d: '%s'\n", tokens, current);
+
+        args[tokens++] = current;
+        current = next_token(&next, ":");
+   
+       
+    }
+
+    LOG("# of tokens:\t%d\n", tokens);
+    for (int i = 0; i < tokens; i++) {
+        LOG("arg[%d]:\t'%s'\n", i, args[i]);
+    }
+
+
+    // TODO: Tokenize path_copy var
+
+    /* For each token:
+
+            opendir(token)
+            readdir(dir_ptr_to_token)
+
+            if (readdir starts w/ text):
+                return it
+
+    return NULL here?
+*/
+
+
+    if (!checked_for_builtins) {
+        for (int i = current_arg_i; i < tokens; i++) {
+
+            current_arg_i = i;
+            LOG("CURRENT ARG I:\t%d\n", current_arg_i);
+            if (dir_ptr == NULL) {
+
+                LOGP("dir_ptr is NULL\n");
+                dir_ptr = opendir(args[i]);
+                dir_name = args[i];
+
+            }
+
+            LOG("CURRENT_ARG_I:\t%d\n", current_arg_i);
+
+            if (dir_ptr == NULL) {
+                continue;
+            }
+
+            LOG("DIR RN POINTING TO:\t'%s'\n", dir_name);
+            // from readdir.c
+            struct dirent *entry;
+
+            while ((entry = readdir(dir_ptr)) != NULL) {
+
+                
+                char* name = entry->d_name; // Using common var for debugging
+                 LOG("-> %s\n", name);
+                if (starts_with(name, text)) {
+                   
+
+                    if (strcmp(name, "ssh-add") == 0) {
+                        LOGP("FOUND ZII HERE\n");
+                        LOG("ENTRY:\t%s\n", name);
+                    }
+
+                    return strdup(name); // Note: to fix mem leak, just have static
+                    // array of matches in this file, then have destroy() func that
+                    // frees everything in array of matches
+                }
+            }
+            LOGP("OUT OF ENTRIES\n");
+            dir_ptr = NULL;
+            dir_name = args[i];
+
+
+
+        }
+    }
+
+    // Reset current_arg_i to 0
+
+    LOG("STATS:\n"
+        "\t->current_arg_i:\t%d\n"
+        "\t->DIR PTR NULL?:\t%d\n"
+        "\t->DIR POINTING TO:\t'%s'\n", current_arg_i, dir_ptr == NULL, dir_name);
+
+    char* builtins[] = {"exit", "jobs", "history", "cd"};
+
+    checked_for_builtins = true;
+    LOG("CURRENT BUILTIN I:\t%d\n", current_builtin_i);
+
+    for (int i = current_builtin_i; i < 4; i++) {
+        current_builtin_i = i;
+        if (starts_with(builtins[current_builtin_i], text)) {
+            LOG("MATCHES:\t'%s'\n", builtins[current_builtin_i]);
+            current_builtin_i++;
+
+
+
+
+            return builtins[i];
+        }
+
+
+    }
+
+
+
+    // Completely finished w/ searching - reset all static vars
+    LOGP("DONE SEARCHING\n");
+       
+
+    dir_ptr = NULL;
+    dir_name = NULL;
+    current_arg_i = 0;
+    current_builtin_i = 0;
+    checked_for_builtins = false;
+
+    LOGP("RETURNING NULL:\n");
     return NULL;
 }

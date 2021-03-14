@@ -18,7 +18,6 @@ static int tail_index;
 /* Func prototypes */
 int circ_array_go_back_by(int i, int n);
 int circ_array_go_forward_by(int i, int n);
-int starts_with(char *word, char *prefix);
 
 void hist_init(unsigned int limit)
 {
@@ -179,8 +178,3 @@ int circ_array_go_forward_by(int i, int n)
 
 }
 
-// Found this implementation from https://stackoverflow.com/questions/15515088/how-to-check-if-string-starts-with-certain-string-in-c/15515276
-int starts_with(char *word, char *prefix)
-{
-    return strncmp(word, prefix, strlen(prefix)) == 0;
-}
