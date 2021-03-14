@@ -5,6 +5,7 @@
 #include "ui.h"
 #include <unistd.h>
 #include "logger.h"
+#include <math.h>
 
 /**
  * Retrieves the next token from a string.
@@ -75,3 +76,19 @@ int starts_with(char *word, char *prefix)
 {
     return strncmp(word, prefix, strlen(prefix)) == 0;
 }
+
+int circ_array_go_back_by(int i, int n, int max_len);
+int circ_array_go_forward_by(int i, int n, int max_len);
+
+int circ_array_go_back_by(int i, int n, int max_len)
+{
+    return abs((100 + i - n) % max_len);
+
+}
+
+int circ_array_go_forward_by(int i, int n, int max_len)
+{
+    return abs((100 + i + n) % max_len);
+
+}
+

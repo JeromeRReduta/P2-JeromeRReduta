@@ -4,6 +4,7 @@
 #include "history.h"
 #include "logger.h"
 #include "string.h"
+#include "util.h"
 
 static int command_nums[100] = {0};
 static char* lines[100] = {0};
@@ -16,8 +17,7 @@ static int tail_index;
 
 
 /* Func prototypes */
-int circ_array_go_back_by(int i, int n);
-int circ_array_go_forward_by(int i, int n);
+
 
 void hist_init(unsigned int limit)
 {
@@ -74,20 +74,20 @@ void hist_add(const char *cmd)
 void hist_print(void)
 {
     LOG("PRINTING:\n"
-        "\tcirc_array_go_back_by(tail_index, current_len-1):\t%d\n"
+        "\tcirc_array_go_back_by(tail_index, current_len-1, max_len):\t%d\n"
         "\ttail_index:\t%d\n",
-        circ_array_go_back_by(tail_index, current_len),
+        circ_array_go_back_by(tail_index, current_len, max_len),
         tail_index);
 
 
     // Case: Head (first entry)
 
-    int i = circ_array_go_back_by(tail_index, current_len);
+    int i = circ_array_go_back_by(tail_index, current_len, max_len);
     printf("    %d  %s\n", command_nums[i], lines[i]);
    
     // Case: Everything except tail
     while (i != tail_index - 1 ) {
-        i = circ_array_go_forward_by(i, 1);
+        i = circ_array_go_forward_by(i, 1, max_len);
         printf("    %d  %s\n", command_nums[i], lines[i]);
        
     }
@@ -123,7 +123,7 @@ const char *hist_search_prefix(char *prefix)
         return lines[i];
     }
     while (i != tail_index) {
-        i = circ_array_go_back_by(i, 1);
+        i = circ_array_go_back_by(i, 1, max_len);
           LOG("i:\t%d\tcommand_num:\t%d\tlines[i]\t%s\n", i, command_nums[i], lines[i]);
         if (starts_with(lines[i], prefix)) {
             LOG("LINES[I]:\t%s\tPREFIX:\t%s\n", lines[i], prefix);
@@ -143,7 +143,7 @@ const char *hist_search_cnum(int command_number)
     if (command_number <= counter) {
         LOGP("COMMAND NUM <= COUNTER\n");
 
-        int i = circ_array_go_back_by(command_number, 1);
+        int i = circ_array_go_back_by(command_number, 1, max_len);
 
         LOG("LOOKING FOR COMMAND W/ NUM:\t%d\n"
             "FOUND:\n"
@@ -166,15 +166,4 @@ unsigned int hist_last_cnum(void)
     return counter;
 }
 
-int circ_array_go_back_by(int i, int n)
-{
-    return abs((100 + i - n) % max_len);
-
-}
-
-int circ_array_go_forward_by(int i, int n)
-{
-    return abs((100 + i + n) % max_len);
-
-}
 
