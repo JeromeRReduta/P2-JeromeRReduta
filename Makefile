@@ -9,7 +9,7 @@ CFLAGS += -g -Wall -fPIC -DLOGGER=$(LOGGER)
 LDLIBS += -lm -lreadline
 LDFLAGS +=
 
-src=history.c shell.c ui.c util.c signal.c pipe.c
+src=history.c shell.c ui.c util.c signal.c pipe.c job_list.c
 obj=$(src:.c=.o)
 
 all: $(bin) libshell.so
@@ -20,11 +20,13 @@ $(bin): $(obj)
 libshell.so: $(obj)
 	$(CC) $(CFLAGS) $(LDLIBS) $(LDFLAGS) $(obj) -shared -o $@
 
-shell.o: shell.c history.h logger.h ui.h signal.c signal.h pipe.c pipe.h
+shell.o: shell.c history.h logger.h ui.h signal.c signal.h pipe.c pipe.h job_list.c job_list.h
 history.o: history.c history.h logger.h 
 ui.o: ui.h ui.c logger.h history.h 
 util.o: util.c util.h logger.h
 pipe.o: pipe.c pipe.h logger.h
+job_list.o: job_list.c job_list.h
+
 
 
 clean:

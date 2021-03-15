@@ -15,14 +15,21 @@
 #include "ui.h"
 #include "util.h"
 #include "signal.h"
+#include "job_list.h"
+#include "pipe.h"
 
 /* Function prototypes */
 void skip_comment(char **current_ptr, char *next);
 void replaceIfBang(char *command);
 
+
+
 int main(void)
 {
     init_ui();
+    signal_init_handlers();
+    hist_init(100);
+    job_list_init();
 
 
 // take command and add to history
@@ -32,8 +39,7 @@ int main(void)
 // BAD IDEA: hard-coding history_entry size (but good when starting)
 // Also, have to free all cases of readline()
 
-    signal_init_handlers();
-    hist_init(100);
+
     char *command;
 
     char *command_copy; // FREE THIS LTER
@@ -52,16 +58,29 @@ int main(void)
         LOG("Input command: %s\n", command);
 
 
+        // TODO: COMMENT BELOW ONE OUT WHEN DONE TESTING
+        // PIPE TESTING - REPLACING LINE W/ "ls -l"
+        //==command = "ls -a | sort -r | sort";
+     
         hist_add(command);
 
+        command_copy = strdup(command);
+
+
+        LOG("COMMAND:\t'%s', COMMAND COPY:\t'%s'\n", command, command_copy);
+
         int tokens = 0;
-        char *next = command;
+        char *next = command_copy;
         char *current;
+
+        bool isBackgroundJob = false;
 
         // 4096 b/c according to Prof. Malensek, POSIX standard requires
         // shells to accept 4096 args (1st being name)
         // Now compiles w/ posix standards!
         char *args[_POSIX_ARG_MAX] = {(char*) 0};
+
+
 
         current = next_token(&next, " \t\r\n");
 
@@ -83,6 +102,24 @@ int main(void)
            
         }
 
+
+        //PIPE_TESTING
+        // test_pipe_one_arg(args); // CONFIRMED SUCCESS
+
+        // test_pipe_two_args(args); // CONFIRMED SUCCESS ON 2 AND EVEN 3 ARGS
+
+
+
+
+        if (strcmp(args[tokens - 1], "&") == 0) {
+            isBackgroundJob = true;
+
+            
+
+            args[tokens - 1] = (char *) NULL;
+            LOG("REMOVING &:\t'%s'\n", args[tokens-1]);
+        }
+
         LOGP("CURRENT ARGS:\t\n");
         for (int i = 0; i < tokens; i++) {
             LOG("\t->:'%s'\n", args[i]);
@@ -95,9 +132,13 @@ int main(void)
             LOGP("NO TOKENS:\n");
 
         }
+        else if (strstr(command, "|") != NULL) {
+            LOGP("FOUND PIPE:\n");
+            run_with_pipe(args);
+        }
         // TODO: copied and pasted from lecture - refactor later
         // Case: exit
-        else if (strcmp(command, "exit") == 0) {
+        else if (strcmp(args[0], "exit") == 0) {
             return EXIT_SUCCESS;
         }
         // Case: cd
@@ -108,6 +149,10 @@ int main(void)
             LOG("HISTORY INPUTTED:\t'%s'\n", command);
             hist_print();
         }
+        else if (strcmp(args[0], "jobs") == 0) {
+            LOG("JOBS LIST INPUTTED:\t'%s'\n", command);
+            job_list_print();
+        } // Note - can't run pipe on single-arg thing for now - there is bug
         // Case: anything else
        else {
 
@@ -127,6 +172,7 @@ int main(void)
             // Note: possible for child to reset stdin stream, so have to close child
             // Linux only
             else if (child == 0) {
+
                 if (execvp(args[0], args) == -1) {
                     perror("execvp");
                 }
@@ -148,19 +194,28 @@ int main(void)
                 LOG("LAST ARG = ARG[%d]:\t'%s'\n", tokens - 1, args[tokens-1]);
                 int status;
 
- 
-                bool isBackgroundJob = strcmp(args[tokens - 1], "&") == 0;
-                
-                pid_t wait_return = !isBackgroundJob ? waitpid(child, &status, 0)
-                    : waitpid(-1, &status, WNOHANG);
+                if (isBackgroundJob) {
+                    LOG("IS BACKGROUND JOB:\t'%s'\n", command);
+                    job_list_add(command);
+                    waitpid(-1, &status, WNOHANG);
+                }
+                else {
+                    waitpid(child, &status, 0);
 
+                }
+
+            
 
             }
 
         }
+
+        free(command_copy);
     
     
     }
+
+    job_list_destroy();
 
     return 0;
 }

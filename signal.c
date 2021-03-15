@@ -17,11 +17,16 @@
 #include <unistd.h>
 
 #include "logger.h"
+#include "job_list.h"
+
+
+
+
 
 
 /* Function prototypes: */
 void sigint_handler(int signo);
-
+void sigchld_handler(int signo);
 
 
 // Initializes the signals
@@ -29,6 +34,11 @@ void signal_init_handlers()
 {
     signal(SIGINT, sigint_handler);
     LOGP("ADDED SIGINT HANDLER\n");
+    signal(SIGCHLD, sigchld_handler);
+    LOGP("ADDED SIGCHLD HANDLER\n");
+
+    LOGP("ATTEMPTING TO SEND SIGINT SIGNAL AGAIN");
+    signal(SIGINT, sigint_handler);
     
 }
 
@@ -47,3 +57,19 @@ void sigint_handler(int signo)
         fflush(stdout);
     }
 }
+
+// Handles child exit signals
+void sigchld_handler(int signo)
+{
+	if (signo == SIGCHLD) {
+	LOGP("CHILD EXITED PROCESS\n");
+
+		LOGP("WAS ALSO BACKGROUND JOB\n");
+		LOGP("CLEARING FIRST AVAIL CHILD\n");
+
+		job_list_pop();
+	}
+
+}
+
+
