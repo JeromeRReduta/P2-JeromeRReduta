@@ -17,6 +17,7 @@
 #include "signal.h"
 #include "job_list.h"
 #include "pipe.h"
+#include "process_io.h"
 
 /* Function prototypes */
 void skip_comment(char **current_ptr, char *next);
@@ -30,6 +31,13 @@ int main(void)
     signal_init_handlers();
     hist_init(100);
     job_list_init();
+
+/*
+    test_p_IO_output();
+    test_p_IO_reset();
+    test_p_IO_append();
+*/
+    test_p_IO_input();
 
 
 // take command and add to history
