@@ -8,6 +8,7 @@
 
 #include "logger.h"
 #include "util.h"
+#include "job_list.h"
 
 // Apparently I can't init values in struct
 typedef struct {

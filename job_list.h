@@ -14,5 +14,7 @@ void job_list_pop();
 
 void job_list_print();
 
+extern bool is_background_job;
+
 
 #endif

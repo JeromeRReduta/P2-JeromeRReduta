@@ -19,10 +19,9 @@ void test_p_IO_append(); // Confirmed success
 void test_p_IO_input(); // Confirmed success
 
 
+void p_IO_process_IO_chars(char **args);
 
-void p_IO_output(char **args);
-void p_IO_append(char **args);
-void p_IO_input(char **args);
+
 void p_IO_reset();
 
 

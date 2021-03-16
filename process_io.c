@@ -15,14 +15,63 @@ bool append;
 
 /* Local func prototypes */
 
+void p_IO_output(char **args);
+void p_IO_append(char **args);
+void p_IO_input(char **args);
 void p_IO_clean_text(char **args);
 void reset_str(char **string);
 
 void log_all_args(char **args);
 void log_extern_vars();
 
-/* TODO: Implmeent the following: */
 
+
+void p_IO_process_IO_chars(char **args)
+{
+
+	int i = 0;
+
+	while (args[i] != NULL) {
+
+		if (strcmp(args[i], ">") == 0) {
+			LOG("FOUND >? '%s'\n", args[i]);
+
+			LOGP("BEFORE OUTPUT()___________________\n");
+			log_all_args(args);
+			p_IO_output(args + i);
+			LOGP("AFTER OUTPUT()_____________________\n");
+			log_all_args(args);
+			log_extern_vars();
+		}
+		else if (strcmp(args[i], ">>") == 0) {
+			LOG("FOUND >>? '%s'\n", args[i]);
+
+			LOGP("BEFORE APPEND()___________________\n");
+			log_all_args(args);
+			p_IO_append(args + i);
+
+			LOGP("AFTER APPEND()_____________________\n");
+			log_all_args(args);
+			log_extern_vars();
+		}
+		else if (strcmp(args[i], "<") == 0) {
+			LOG("FOUND <? '%s'\n", args[i]);
+
+			LOGP("BEFORE INPUT()___________________\n");
+			log_all_args(args);
+			p_IO_input(args + i);
+
+			LOGP("AFTER INPUT()_____________________\n");
+			log_all_args(args);
+			log_extern_vars();
+		}
+
+
+		else {
+			i++;
+		}
+	}
+}
 
 
 
@@ -44,6 +93,7 @@ void p_IO_append(char **args)
 
 	append = true;
 
+	LOGP("CALLING OUTPUT TOO\n");
 	p_IO_output(args);
 }
 
@@ -55,11 +105,24 @@ void p_IO_input(char **args)
 
 }
 
-
+// Shifts every arg 2 elems to the left, starting from args[i + 2] (2nd arg after ">" or "<" or ">>"), essentially elminating args[i] and args[i+1]
+// Also moves 1st null so we don't have weird things happen
 
 void p_IO_clean_text(char **args) {
-	args[0] = "\0";
-	args[1] = "\0";
+	
+	int i = 0;
+
+	LOG("args[2] = '%s'\n", args[i + 2]);
+
+	while (args[i+2] != NULL) {
+
+		LOG("args[%d] becomes args[%d] - '%s' becomes '%s'\n", i, i+2, args[i], args[i+2]);
+		args[i] = args[i+2];
+		i++;
+	}
+	args[i] = args[i + 2]; // Moving null-terminator to spots to left
+
+
 }
 
 
@@ -68,6 +131,10 @@ void p_IO_reset()
 	reset_str(&stdin_file);
 	reset_str(&stdout_file);
 	append = false;
+
+
+	LOGP("AFTER RESET()____________\n");
+	log_extern_vars();
 
 }
 
@@ -187,6 +254,7 @@ void test_p_IO_input()
 	log_all_args(args);
 
 	log_extern_vars();
+
 
 	p_IO_reset();
 

@@ -23,6 +23,8 @@
 void skip_comment(char **current_ptr, char *next);
 void replaceIfBang(char *command);
 
+bool is_background_job = false;
+
 
 
 int main(void)
@@ -36,8 +38,8 @@ int main(void)
     test_p_IO_output();
     test_p_IO_reset();
     test_p_IO_append();
-*/
     test_p_IO_input();
+*/
 
 
 // take command and add to history
@@ -81,7 +83,7 @@ int main(void)
         char *next = command_copy;
         char *current;
 
-        bool isBackgroundJob = false;
+
 
         // 4096 b/c according to Prof. Malensek, POSIX standard requires
         // shells to accept 4096 args (1st being name)
@@ -95,7 +97,7 @@ int main(void)
 
         while (current != NULL) {
 
-            LOG("Token %02d: '%s'\n", tokens, current);
+            //LOG("Token %02d: '%s'\n", tokens, current);
 
             // Case: comments
             if (current[0] == '#') {
@@ -120,7 +122,7 @@ int main(void)
 
 
         if (strcmp(args[tokens - 1], "&") == 0) {
-            isBackgroundJob = true;
+            is_background_job = true;
 
             
 
@@ -128,25 +130,32 @@ int main(void)
             LOG("REMOVING &:\t'%s'\n", args[tokens-1]);
         }
 
+/*
         LOGP("CURRENT ARGS:\t\n");
         for (int i = 0; i < tokens; i++) {
             LOG("\t->:'%s'\n", args[i]);
         }
         LOGP("\n");
-
+*/
 
         // Case: no args (just pressing enter)
         if (tokens == 0) {
             LOGP("NO TOKENS:\n");
+            continue;
 
         }
-        else if (strstr(command, "|") != NULL) {
+
+        p_IO_process_IO_chars(args);
+        
+/*
+        if (strstr(command, "|") != NULL) {
             LOGP("FOUND PIPE:\n");
-            run_with_pipe(args);
+            do_pipe(args);
         }
+        */
         // TODO: copied and pasted from lecture - refactor later
         // Case: exit
-        else if (strcmp(args[0], "exit") == 0) {
+        if (strcmp(args[0], "exit") == 0) {
             return EXIT_SUCCESS;
         }
         // Case: cd
@@ -163,7 +172,9 @@ int main(void)
         } // Note - can't run pipe on single-arg thing for now - there is bug
         // Case: anything else
        else {
+            do_pipe(args);
 
+            /*
 
             LOGP("DOING CHILD FORK THING:\n");
 
@@ -216,9 +227,16 @@ int main(void)
 
             }
 
+    */
+
+
+
+
         }
+        is_background_job = false;
 
         free(command_copy);
+        p_IO_reset();
     
     
     }
