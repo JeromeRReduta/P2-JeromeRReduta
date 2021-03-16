@@ -1,8 +1,8 @@
 # Output binary name
-bin=crash
+bin=this_leaks_how_much_oh_sh
 
 # Set the following to '0' to disable log messages:
-LOGGER ?= 1
+LOGGER ?= 0
 
 # Compiler/linker flags
 CFLAGS += -g -Wall -fPIC -DLOGGER=$(LOGGER)

@@ -3,14 +3,23 @@
 // Name is kind of misleading, but I don't want to type "background jobs," or ...bjobs...
 
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 
 #include "logger.h"
 #include "util.h"
 #include "job_list.h"
 
+/**
+ * @file Data and functions for editing and keeping track of a list of background jobs
+ * 
+ * Many of these funcs are prefixed with job_list. I tried going for a shorter prefix that included "background" in some way, but "bjobs_func()" didn't sit right with me for some reason
+ */
+
 // Apparently I can't init values in struct
+
+/**
+ * Struct representing a list of background jobs
+ */
 typedef struct {
 
 	// list of job names - circular array
@@ -32,12 +41,9 @@ typedef struct {
 
 static Job_List* jobs;
 
-// TODO: IMPLEMENT THE FOLLOWING
-
-
-
-void job_list_print();
-
+/**
+ * @brief      Initializes job list
+ */
 void job_list_init()
 {
 	jobs = calloc(1, sizeof(Job_List));
@@ -58,7 +64,11 @@ void job_list_init()
 
 }
 
-
+/**
+ * @brief      Adds one job to the job list
+ *
+ * @param      job_name  job name
+ */
 void job_list_add(char *job_name)
 {
 
@@ -84,6 +94,11 @@ void job_list_add(char *job_name)
 
 }
 
+/**
+ * @brief      Removes the head of the job list
+ * 
+ * Note: This doesn't work
+ */
 void job_list_pop()
 {
 
@@ -105,13 +120,11 @@ void job_list_pop()
 
 }
 
-
-
-
-
-
-// Frees all job_names and sets jobs to NULL
-// UNTESTED
+/**
+ * @brief      Frees all job names and sets them to NULL
+ * 
+ * Note: Needs testing
+ */
 void job_list_destroy()
 {
 
@@ -134,6 +147,9 @@ void job_list_destroy()
 
 }
 
+/**
+ * @brief      Prints the entries in the job list, starting w/ the first index
+ */
 void job_list_print()
 {
 	LOGP("STARTING PRINT()\n");
@@ -149,34 +165,10 @@ void job_list_print()
 
 		// Note: This won't show on test b/c parent is killed to see what list actually looks like
 		//printf("PLACEHOLDER[%d]: BUBBA\n", count);
-
-
-
-
 	}
 
 	LOGP("PRINT FINISHED\n");
 
 }
 
-// Tests to make sure print() works - only entries w/ even indices should print
-/* Tests successful:
-	Only even indices should print, head_index = 0
-	Only even indices should print, head_index = 5
-*/
-void test_print()
-{
 
-	jobs->head_index = 5;
-	LOGP("TESTING PRINT\n");
-	int len = jobs->list_real_len;
-	for (int count = 0; count < len; count++) {
-		if (count % 2 == 0) {
-			jobs->job_list[count] = strdup("Bubba");
-			jobs->running[count] = 1;
-		}
-	}
-
-	job_list_print();
-
-}

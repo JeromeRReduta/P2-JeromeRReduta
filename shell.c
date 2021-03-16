@@ -16,17 +16,26 @@
 #include "util.h"
 #include "signal.h"
 #include "job_list.h"
-#include "pipe.h"
 #include "process_io.h"
+#include "pipe.h"
+
+/**
+ * @file Driver function
+ */
 
 /* Function prototypes */
 void skip_comment(char **current_ptr, char *next);
 void replaceIfBang(char *command);
 
 bool is_background_job = false;
+char* background_command = NULL;
 
 
-
+/**
+ * @brief      Driver func
+ *
+ * @return     main() return value
+ */
 int main(void)
 {
     init_ui();
@@ -50,10 +59,12 @@ int main(void)
 // Also, have to free all cases of readline()
 
 
-    char *command;
+    
 
-    char *command_copy; // FREE THIS LTER
+    
     while (true) {
+        char *command;
+        char *command_copy; // FREE THIS LTER
         command = read_command();
 
 
@@ -124,9 +135,14 @@ int main(void)
         if (strcmp(args[tokens - 1], "&") == 0) {
             is_background_job = true;
 
+
             
 
             args[tokens - 1] = (char *) NULL;
+
+            background_command = strdup(command);
+
+
             LOG("REMOVING &:\t'%s'\n", args[tokens-1]);
         }
 
@@ -173,68 +189,10 @@ int main(void)
         // Case: anything else
        else {
             do_pipe(args);
-
-            /*
-
-            LOGP("DOING CHILD FORK THING:\n");
-
-
-            pid_t child = fork();
-
-            // If cannot make any more children, just keep going until
-            // we can make another fork
-            if (child == -1) {
-                perror("fork");
-                continue;
-            }
-            // Case: child
-            // Note: possible for child to reset stdin stream, so have to close child
-            // Linux only
-            else if (child == 0) {
-
-                if (execvp(args[0], args) == -1) {
-                    perror("execvp");
-                }
-
-                // Close these 3 so that child doesn't reset data
-                // Last 2 not too necessary but 1st one is
-                close(fileno(stdin));
-                close(fileno(stdout));
-                close(fileno(stderr));
-                
-                // Putting this out of error case - see if it works
-                // If I don't put this return outside of the error case, I think we end up with an infinite loop?
-                return EXIT_FAILURE;
-            }
-            // Case: parent
-            else {
-                //puts("Bubba Bradley is waiting for his daughter\n");
-
-                LOG("LAST ARG = ARG[%d]:\t'%s'\n", tokens - 1, args[tokens-1]);
-                int status;
-
-                if (isBackgroundJob) {
-                    LOG("IS BACKGROUND JOB:\t'%s'\n", command);
-                    job_list_add(command);
-                    waitpid(-1, &status, WNOHANG);
-                }
-                else {
-                    waitpid(child, &status, 0);
-
-                }
-
-            
-
-            }
-
-    */
-
-
-
-
         }
-        is_background_job = false;
 
+        is_background_job = false;
+        // background_command freed in job_list_destroy   
         free(command_copy);
         p_IO_reset();
     
@@ -246,16 +204,24 @@ int main(void)
     return 0;
 }
 
+/**
+ * @brief      Skips comments in arg parsing
+ *
+ * @param      current_ptr  current ptr
+ * @param      next         ptr to thing after current_ptr
+ */
 void skip_comment(char **current_ptr, char *next) {
     LOGP("current_ptr HAS #");
     next_token(&next, "\r\n");
     *current_ptr = next_token(&next, "\r\n");
     LOG("current_ptr NOW:\t'%s'\n", *current_ptr);
-
 }
 
-
-
+/**
+ * @brief      Replaces commands that start w/ ! with outputs of their history commands
+ *
+ * @param      command  commandline arguments
+ */
 void replaceIfBang(char *command)
 {
 

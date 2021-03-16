@@ -13,10 +13,14 @@
 #include "ui.h"
 #include "util.h"
 
+/*
+ *@file Functions for dealing with the user interfaec
+ */
 
 
 /* Function prototypes */
 static int readline_init(void);
+static int current_command_num = 0;
 
 char *get_prompt_str();
 void add_login(char *prompt_str_copy);
@@ -39,6 +43,13 @@ static int current_builtin_i = 0;
 static bool checked_for_builtins = false;
 
 
+/**
+ * @brief      Constructs the prompt_str and returns it
+ *
+ * @param      prompt_str  Initial prompt_str buffer (this function overwrites prompt_str)
+ *
+ * @return     Constructed prompt_str
+ */
 char *get_prompt_str(char *prompt_str)
 {
     char prompt_str_copy[80] = "You're li-shell-ing to KRASH at [";
@@ -55,12 +66,22 @@ char *get_prompt_str(char *prompt_str)
     return prompt_str;
 }
 
+/**
+ * @brief      Adds login info to prompt_str
+ *
+ * @param      prompt_str_copy  prompt_str buffer copy
+ */
 void add_login(char *prompt_str_copy)
 {
     strcat(prompt_str_copy, getlogin());
     strcat(prompt_str_copy, "@");
 }
 
+/**
+ * @brief      Adds hostname info to prompt_str
+ *
+ * @param      prompt_str_copy  prompt_str buffer copy
+ */
 void add_hostname(char *prompt_str_copy)
 {
     char hostname_buf[80];
@@ -70,6 +91,11 @@ void add_hostname(char *prompt_str_copy)
 
 }
 
+/**
+ * @brief      Adds current working directory name to prompt_str
+ *
+ * @param      prompt_str_copy  prompt_str buffer copy
+ */
 void add_current_dir(char *prompt_str_copy)
 {
     char cwd_buf[80];
@@ -77,19 +103,17 @@ void add_current_dir(char *prompt_str_copy)
     char *home_dir_head = strstr(cwd_buf, home_dir);
 
     if (home_dir_head != NULL && home_dir_head - cwd_buf == 0) {
-        //LOG("FOUND HOME_DIR:\t%s\n", home_dir_head);
-        // Replace "/home/jrreduta" w/ "~"
         strcat(prompt_str_copy, "~");
-        // Add the rest
         strcat(prompt_str_copy, cwd_buf + home_dir_len);
     }
     else {
         strcat(prompt_str_copy, cwd_buf);
     }
-
 }
 
-
+/**
+ * @brief      Initializes UI
+ */
 void init_ui(void)
 {
     LOGP("Initializing UI...\n");
@@ -103,8 +127,6 @@ void init_ui(void)
     }
     else {
         LOGP("Data is piped in on stdin -> script\n");
-        //char* args[] = {"cd", "/"};
-        //cd_with(args);
 
         char cwd_buf[80];
         getcwd(cwd_buf, 80);
@@ -116,15 +138,24 @@ void init_ui(void)
     rl_startup_hook = readline_init;
 }
 
+/**
+ * @brief      Returns a constructed prompt_str
+ *
+ * @return     A constructed prompt_str
+ */
 char *prompt_line(void) {
     get_prompt_str(prompt_str);
+    current_command_num = hist_last_cnum(); // Refreshes history tracking after every entry
     return prompt_str;
 }
 
+/**
+ * @brief      Prompts a user in interactive mode for input (no prompt in script mode), and gets their input
+ *
+ * @return     { description_of_the_return_value }
+ */
 char *read_command(void)
 {
-
-
 
     if (scripting) {
         char *line = NULL;
@@ -145,25 +176,12 @@ char *read_command(void)
     }
 }
 
-char *scriptline(char **line_ptr, size_t *line_sz_ptr)
-{
 
-    // Note: Have to free mem from this later
-    // Note: getline keeps \n char 
-    size_t read_sz = getline(line_ptr, line_sz_ptr, stdin);
-
-    if (read_sz == -1) {
-        perror("getline");
-        return NULL;
-    }
-
-    *line_ptr[read_sz-1] = '\0';
-
-    return *line_ptr;
-}
-
-
-
+/**
+ * @brief      Initializes readline ilbrary
+ *
+ * @return     0 (success) for readline library
+ */
 int readline_init(void)
 {
     rl_bind_keyseq("\\e[A", key_up);
@@ -174,6 +192,14 @@ int readline_init(void)
     return 0;
 }
 
+/**
+ * @brief      When the user presses up, replaces user's input with the previous line.
+ *
+ * @param[in]  count  count
+ * @param[in]  key    up key (for compliance with readline lib)
+ *
+ * @return     0 (success) for readline
+ */
 int key_up(int count, int key)
 {
     /* Modify the command entry text: */
@@ -182,11 +208,26 @@ int key_up(int count, int key)
     /* Move the cursor to the end of the line: */
     rl_point = rl_end;
 
-    // TODO: reverse history search
+    LOG("CURRENT COMMAND_NUM:\t%d\n", current_command_num);
+
+    int new_command_num = current_command_num-1 != 0 ? current_command_num - 1 : current_command_num;
+
+    LOG("NEW COMMAND_NUM:\t%d\n", new_command_num);
+    rl_replace_line(hist_search_cnum(new_command_num), 0);
+
+    current_command_num = new_command_num;
 
     return 0;
 }
 
+/**
+ * @brief      When the user presses down, replaces user's input with the next line in history (if the user was already at the most recent line, this func replaces input with a blank line instead)
+ *
+ * @param[in]  count  count
+ * @param[in]  key    down key (for compliance with readline lib)
+ *
+ * @return     0 (success) for readline
+ */
 int key_down(int count, int key)
 {
     /* Modify the command entry text: */
@@ -195,11 +236,27 @@ int key_down(int count, int key)
     /* Move the cursor to the end of the line: */
     rl_point = rl_end;
 
-    // TODO: forward history search
+    if (current_command_num == hist_last_cnum()) {
+        rl_replace_line(" ", 0);
+    }
+    else {
+        current_command_num++;
+        rl_replace_line(hist_search_cnum(current_command_num), 0);
+    }
+
 
     return 0;
 }
 
+/**
+ * @brief      Autocomplete driver function
+ *
+ * @param[in]  text   text to find matches against
+ * @param[in]  start  unused by code
+ * @param[in]  end    unused by code
+ *
+ * @return     { description_of_the_return_value }
+ */
 char **command_completion(const char *text, int start, int end)
 {
     /* Tell readline that if we don't find a suitable completion, it should fall
@@ -214,16 +271,25 @@ char **command_completion(const char *text, int start, int end)
  * possible completions. It returns one match per function call. Once there are
  * no more completions available, it returns NULL.
  */
+
+/**
+ * @brief       From Prof. Malensek: "This function is called repeatedly by the readline library to build a list of
+ * possible completions. It returns one match per function call. Once there are
+ * no more completions available, it returns NULL"
+ *
+ * @param[in]  text   text to match against
+ * @param[in]  state  unused
+ *
+ * @return     the next string that starts w/ text, or NULL if no more strings
+ * 
+ * @note       Function searches in this order: executables in PATH, built-in commands (exit, jobs, history, cd), file-names in current working directory
+ */
 char *command_generator(const char *text, int state)
 {
 
 
     LOGP("____________________START AUTO-COMPLETE____________________\n\n");
-    // TODO: find potential matching completions for 'text.' If you need to
-    // initialize any data structures, state will be set to '0' the first time
-    // this function is called. You will likely need to maintain static/global
-    // variables to track where you are in the search so that you don't start
-    // over from the beginning.
+
 
     LOGP("GETTING PATH...\n");
 
@@ -268,19 +334,6 @@ char *command_generator(const char *text, int state)
     }
 
 
-    // TODO: Tokenize path_copy var
-
-    /* For each token:
-
-            opendir(token)
-            readdir(dir_ptr_to_token)
-
-            if (readdir starts w/ text):
-                return it
-
-    return NULL here?
-*/
-
 
     if (!checked_for_builtins) {
         for (int i = current_arg_i; i < tokens; i++) {
@@ -313,10 +366,6 @@ char *command_generator(const char *text, int state)
                 if (starts_with(name, text)) {
                    
 
-                    if (strcmp(name, "ssh-add") == 0) {
-                        LOGP("FOUND ZII HERE\n");
-                        LOG("ENTRY:\t%s\n", name);
-                    }
 
                     return strdup(name); // Note: to fix mem leak, just have static
                     // array of matches in this file, then have destroy() func that

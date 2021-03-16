@@ -4,6 +4,8 @@
  * Contains data and funcs for manipulating background job list
  */
 
+#include <stdbool.h>
+
 #ifndef _JOB_LIST_H_
 #define _JOB_LIST_H_
 
@@ -15,6 +17,6 @@ void job_list_pop();
 void job_list_print();
 
 extern bool is_background_job;
-
+extern char* background_command;
 
 #endif

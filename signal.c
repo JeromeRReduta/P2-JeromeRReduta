@@ -1,5 +1,5 @@
 /**
- * signal.c
+ * @file Functions for handling signals
  *
  * Demonstrates signal handling. During normal operation this program counts up
  * each second, starting from 1. Upon receiving SIGINT, the final count will be
@@ -29,7 +29,9 @@ void sigint_handler(int signo);
 void sigchld_handler(int signo);
 
 
-// Initializes the signals
+/**
+ * @brief      Initializes signal handlers
+ */
 void signal_init_handlers()
 {
     signal(SIGINT, sigint_handler);
@@ -42,32 +44,35 @@ void signal_init_handlers()
     
 }
 
-// Handles inputted signals
+/**
+ * @brief      Handler for SIGINT signal
+ *
+ * @param[in]  signo  signal number
+ */
 void sigint_handler(int signo)
 {
-
     if (signo == SIGINT) {
-
-        
         LOGP("CTRL C PRESSED\n");
-
-        /* Note: ui.c already prints prompt by default if task is not currently running, while
-         * cancelling running process. I have no idea why */
-
         fflush(stdout);
     }
 }
 
-// Handles child exit signals
+/**
+ * @brief      Handler for SIGCHLD signal
+ *
+ * @param[in]  signo  signal number
+ * 
+ * @note This is probably bugged
+ */
 void sigchld_handler(int signo)
 {
 	if (signo == SIGCHLD) {
 	LOGP("CHILD EXITED PROCESS\n");
 
-		LOGP("WAS ALSO BACKGROUND JOB\n");
-		LOGP("CLEARING FIRST AVAIL CHILD\n");
+	LOGP("WAS ALSO BACKGROUND JOB\n");
+	LOGP("CLEARING FIRST AVAIL CHILD\n");
 
-		job_list_pop();
+	job_list_pop();
 	}
 
 }

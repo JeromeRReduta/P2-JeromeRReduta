@@ -1,44 +1,71 @@
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "history.h"
 #include "logger.h"
 #include "string.h"
 #include "util.h"
 
+/**
+ * @file data and functions for keeping track and manipulating a history list (i.e. a list of previously-entered commands)
+ */
+
+
+
+
+
 static int command_nums[100] = {0};
 static char* lines[100] = {0};
 static int counter = 0;
-static int max_len;
-static int current_len;
+static int max_len = 0;
+static int current_len = 0;
 
 
-static int tail_index;
+static int tail_index = 0;
 
 
 /* Func prototypes */
 
 
+/**
+ * @brief      Initalizes a circular array to hold previous commands
+ *
+ * @param[in]  limit  Size of array
+ */
 void hist_init(unsigned int limit)
 {
 
     max_len = limit;
     current_len = 0;
 
-    // TODO: set up history data structures, with 'limit' being the maximum
-    // number of entries maintained.
-
-    // TODO: Figure out how limit works into this
 }
 
+/**
+ * @brief      Resets all history data, including freeing allocated memory
+ */
 void hist_destroy(void)
 {
 
-    // free(&hist); // Not in heap, so don't have to free?
+    for (int i = 0; i < max_len; i++) {
+        if (lines[i] != NULL) {
+            free(lines[i]);
+        }
+        command_nums[i] = 0;
+
+    }
+    current_len = 0;
+    tail_index = 0;
+    max_len = 0;
 
 }
 
-// TODO: change counter % max_len to counter % max_len once done w/ testing
+
+/**
+ * @brief      Adds one string to history array
+ *
+ * @param[in]  cmd   command string
+ */
 void hist_add(const char *cmd)
 {
 
@@ -71,6 +98,9 @@ void hist_add(const char *cmd)
     
 }
 
+/**
+ * @brief      Prints the contents of the history array, starting from the one with the lowest command number
+ */
 void hist_print(void)
 {
     LOG("PRINTING:\n"
@@ -96,6 +126,13 @@ void hist_print(void)
 
 }
 
+/**
+ * @brief      Searches for a string in the history array, based on prefix
+ *
+ * @param      prefix  prefix
+ *
+ * @return     A matching string, or NULL if no match
+ */
 const char *hist_search_prefix(char *prefix)
 {
 
@@ -136,6 +173,13 @@ const char *hist_search_prefix(char *prefix)
 
 }
 
+/**
+ * @brief      Searches for a string in history array by command number
+ *
+ * @param[in]  command_number  command number
+ *
+ * @return     The matching string, or NULL if there is none
+ */
 const char *hist_search_cnum(int command_number)
 {
 
@@ -160,6 +204,11 @@ const char *hist_search_cnum(int command_number)
     return NULL;
 }
 
+/**
+ * @brief      Returns the most recent command num (which just so happens to = counter)
+ *
+ * @return     Most recent command num
+ */
 unsigned int hist_last_cnum(void)
 {
 
