@@ -82,6 +82,8 @@ To compile and run:
 # Edit
 I hope this doesn't count but I kind of wanted to see how much code I wrote, so I ran CLOC (suggested by https://stackoverflow.com/questions/26881441/can-you-get-the-number-of-lines-of-code-from-a-github-repository#:~:text=In%20a%20GitHub%20repository%20you,code%20the%20project%20consists%20of.). I'll put the results below, for science.
 
+
+<pre>
 [jrreduta@KevinM counting-code]$ cloc P2-JeromeRReduta/
       21 text files.
       21 unique files.
@@ -98,7 +100,7 @@ make                             1             16              4             29
 -------------------------------------------------------------------------------
 SUM:                            18            581            570           1205
 -------------------------------------------------------------------------------
-
+</pre>
 
 
 
