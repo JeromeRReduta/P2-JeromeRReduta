@@ -1,0 +1,167 @@
+/**
+ * @defgroup   TESTS tests
+ *
+ * @file      Giant file for storing tests originally from other files, in case I ever need to use them again
+ *
+ * @author     Jrred
+ * @date       2021
+ */
+
+
+
+/* job_list.c */
+
+/**
+ * @brief      Tests job_list_print
+ */
+void test_print()
+{
+
+	jobs->head_index = 5;
+	LOGP("TESTING PRINT\n");
+	int len = jobs->list_real_len;
+	for (int count = 0; count < len; count++) {
+		if (count % 2 == 0) {
+			jobs->job_list[count] = strdup("Bubba");
+			jobs->running[count] = 1;
+		}
+	}
+
+	job_list_print();
+
+}
+
+/* process_io.c */
+/**
+ * @brief      Tests p_IO_output()
+ */
+void test_p_IO_output()
+{
+	LOGP("TESTING P_IO_OUTPUT________________________\n");
+
+
+	char* args[] = {"echo", "aaaaa", ">", "bubba.txt", NULL};
+
+
+	LOGP("BEFORE PROCESSING:\t\n");
+	log_extern_vars();
+	log_all_args(args);
+
+
+
+	int i = 0;
+	while (args[i] != NULL) {
+
+		if (strcmp(args[i], ">") == 0) {
+			LOG("FOUND > :\t'%s'\n", args[i]);
+
+			p_IO_output(args + i);
+		}
+
+		i++;
+	}
+
+	LOGP("AFTER P_IO_OUTPUT()\n");
+	log_all_args(args);
+
+	log_extern_vars();
+
+	p_IO_reset();
+}
+
+/**
+ * @brief      Tests p_IO_append()
+ */
+void test_p_IO_append()
+{
+	LOGP("TESTING p_io_append________________________\n");
+
+
+	char* args[] = {"echo", "aaaaa", ">>", "bubba.txt", NULL};
+
+
+	LOGP("BEFORE PROCESSING:\t\n");
+	log_extern_vars();
+	log_all_args(args);
+
+
+
+	int i = 0;
+	while (args[i] != NULL) {
+
+		if (strcmp(args[i], ">>") == 0) {
+			LOG("FOUND >> :\t'%s'\n", args[i]);
+
+			p_IO_append(args + i);
+		}
+
+		i++;
+	}
+
+	LOGP("AFTER p_io_append()\n");
+	log_all_args(args);
+
+	log_extern_vars();
+
+	p_IO_reset();
+}
+
+/**
+ * @brief      Tests p_IO_input()
+ */
+void test_p_IO_input()
+{
+
+	LOGP("TESTING p_IO_input________________________\n");
+
+
+	char* args[] = {"echo", "aaaaa", "<", "bubba.txt", NULL};
+
+
+	LOGP("BEFORE PROCESSING:\t\n");
+	log_extern_vars();
+	log_all_args(args);
+
+
+
+	int i = 0;
+	while (args[i] != NULL) {
+
+		if (strcmp(args[i], "<") == 0) {
+			LOG("FOUND < :\t'%s'\n", args[i]);
+
+			p_IO_input(args + i);
+		}
+
+		i++;
+	}
+
+	LOGP("AFTER p_IO_input()\n");
+	log_all_args(args);
+
+	log_extern_vars();
+
+
+	p_IO_reset();
+}
+
+/**
+ * @brief      Tests p_IO_reset()
+ */
+void test_p_IO_reset()
+{
+
+	LOGP("TESTING RESET_________________________________________\n\n");
+
+	//stdin_file = strdup("a.txt");
+	//stdout_file = strdup("b.txt");
+	append = 1;
+
+	LOGP("NEW EXTERN VARS\n");
+	log_extern_vars();
+
+	p_IO_reset();
+
+	LOGP("AFTER FREEING\n");
+	log_extern_vars();
+}
